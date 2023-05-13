@@ -1,0 +1,9 @@
+[submodule "dwm"]
+	path = dwm
+	url = https://github.com/AnissL93/dwm
+[submodule "st"]
+	path = st
+	url = https://github.com/AnissL93/st.git
+[submodule "Dotfiles"]
+	path = Dotfiles
+	url = https://github.com/AnissL93/Dotfiles.git

@@ -7,3 +7,6 @@
 [submodule "Dotfiles"]
 	path = Dotfiles
 	url = https://github.com/AnissL93/Dotfiles.git
+[submodule "wallpapers"]
+	path = wallpapers
+	url = https://github.com/makccr/wallpapers.git

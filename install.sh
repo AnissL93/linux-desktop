@@ -99,19 +99,21 @@ function fonts() {
 }
 
 function install_emacs() {
-	#sudo apt install libtiff-dev libgif-dev libgnutls28-dev libncurses-dev mailutils
-	#wget http://mirror.freedif.org/GNU/emacs/emacs-28.2.tar.gz
-	#mv emacs-28.2.tar.gz $HOME/System
-	#cd $HOME/System
-	#tar zxvf emacs-28.2.tar.gz
-	#cd emacs-28.2
-	#./configure
-	#sudo make install -j 8
+	local version=$1
+	sudo apt-get install build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev libtiff-dev libgtk2.0-dev libncurses-dev automake autoconf
+	sudo apt install libtiff-dev libgif-dev libgnutls28-dev libncurses-dev mailutils libgccjit-10-dev libxaw-7-dev libmagic++-dev
+	wget http://mirror.freedif.org/GNU/emacs/emacs-${version}.tar.gz
+	mv emacs-${version}.tar.gz $HOME/System
+	cd $HOME/System
+	tar zxvf emacs-${version}.tar.gz
+	cd emacs-${version}
+    CFLAGS='-march=native -O3' ../configure     --with-modules    --with-mailutils     --with-imagemagick  -C     --with-x-toolkit=lucid
+	sudo make install -j 8
 
-	git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
-	cd ~/.config/
-	ln -s $DESKTOP_DIR/Dotfiles/doom doom
-	~/.config/emacs/bin/doom install
+#	git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/emacs
+#	cd ~/.config/
+#	ln -s $DESKTOP_DIR/Dotfiles/doom doom
+	~/.config/emacs/bin/doom sync -e
 }
 
 function cuda() {
@@ -134,8 +136,11 @@ function cuda() {
 }
 
 #install_desktop_apps
+install_emacs 29.3
+#exit
+#dep
+#term
 #fonts
 #ui
-#install_emacs
-cuda
+#cuda
 

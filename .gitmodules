@@ -10,3 +10,6 @@
 [submodule "wallpapers"]
 	path = wallpapers
 	url = https://github.com/makccr/wallpapers.git
+[submodule "slock"]
+	path = slock
+	url = https://git.suckless.org/slock

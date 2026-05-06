@@ -11,8 +11,8 @@ function term() {
 	bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
 	
 	echo "Configure git"
-	git config --global user.email "hy.lan@nus.edu.sg"
-	git config --global user.user "Huiying Lan"
+	git config --global user.email "huiying.lan93@gmail.com"
+	git config --global user.user "Aniss Lan"
 	
 	echo "Install fzf"
 	
@@ -22,7 +22,7 @@ function term() {
 
 
 function dep() {
-	sudo apt-get install xcb libxcb-xkb-dev x11-xkb-utils libxkbcommon-x11-dev libx11-dev libxinerama-dev libxft-dev libx11-xcb-dev libxcb-res0-dev libharfbuzz-dev xutils-dev libtool notification-daemon 
+	sudo apt-get install xcb libxcb-xkb-dev x11-xkb-utils libxkbcommon-x11-dev libx11-dev libxinerama-dev libxft-dev libx11-xcb-dev libxcb-res0-dev libharfbuzz-dev xutils-dev libtool notification-daemon libcrypt-dev libxcrypt-dev
 
 }
 
@@ -56,11 +56,10 @@ function conda() {
 
 function ui() {
 	# wallpapers and xresouces
-	sudo apt install xwallpapers xcompmgr redshift
+	sudo apt install xcompmgr redshift
 	cd $DESKTOP_DIR
 	git clone https://github.com/makccr/wallpapers.git
-	cd ~/.local/share/wallpapers
-	ln -s $DESKTOP_DIR/wallpapers wallpapers
+	ln -s $DESKTOP_DIR/wallpapers ~/.local/share/wallpapers
 
 	pip install pywal colorz
 	changebg
@@ -135,8 +134,12 @@ function cuda() {
 	sudo apt-get -y install cuda
 }
 
+#dep
+#term
+
+ui
 #install_desktop_apps
-install_emacs 29.3
+#install_emacs 29.3
 #exit
 #dep
 #term

@@ -27,7 +27,9 @@ function dep() {
 }
 
 function input_method() {
-	sudo apt install fcitx fcitx-rime
+	sudo apt install fcitx5 fcitx-rime
+	rm -rf ~/.local/share/fcitx5/rime
+	git clone git@github.com:AnissL93/rime.git ~/.local/share/fcitx5/
 }
 
 function install_desktop_apps() {
@@ -77,24 +79,13 @@ function fonts() {
 	sh autogen.sh --sysconfdir=/etc --prefix=/usr --mandir=/usr/share/man
 	sudo make install
 
-	sudo apt remove fonts-noto-color-emoji
-	wget https://raw.githubusercontent.com/Sav22999/emoji/master/font/twemoji-fix-macos.ttf
-	mv twemoji-fix-macos.ttf ~/.local/share/fonts
-
-	wget https://raw.githubusercontent.com/Sav22999/emoji/master/font/joypixels.ttf
-	mv joypixels.ttf ~/.local/share/fonts
+	sudo apt install fonts-noto-color-emoji fonts-symbola
 
 	## set font config 
-	mkdir ~/.config/fonts
-	cd ~/.config/fonts
-	ln -s $DESKTOP_DIR/Dotfiles/fonts/fonts.conf fonts.conf
+	cd ~/.config/
+	ln -s $DESKTOP_DIR/Dotfiles/fontconfig/
 
-	## Sarasa mono
-	sudo apt install p7zip-full
-	cd ~/.local/share/fonts
-	wget https://github.com/be5invis/Sarasa-Gothic/releases/download/v0.40.7/sarasa-gothic-super-ttc-0.40.7.7z
-	7z x sarasa-gothic-super-ttc-0.40.7.7z
-	fc-cache
+	fc-cache -fv
 }
 
 function install_emacs() {

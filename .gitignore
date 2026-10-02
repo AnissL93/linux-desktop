@@ -1,4 +1,5 @@
 # downloads, build leftovers and third-party clones
 /LigaturizedFonts.zip
 /ltmain.sh
-/libxft-bgra/
+/linux/libxft-bgra/
+/linux/dunst/dunstrc.d/

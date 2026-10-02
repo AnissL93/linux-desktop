@@ -1,0 +1,53 @@
+#!/bin/sh
+# Switch the Chinese (CJK fallback) font for dwm, dmenu, st, alacritty, firefox, vscode and emacs.
+# usage: set-cjk-font                      show current font
+#        set-cjk-font "Family" [pixelsize] switch font; pixelsize applies to dwm, dmenu and st
+#                                          (pixel fonts: use a multiple of their grid, e.g. Cubic 11 -> 24)
+set -e
+
+DWM="$HOME/System/personal-infra/desktop/linux/dwm"
+FF="$("$(dirname "$(readlink -f "$0")")/ff-profile")"   # current Firefox profile
+CODE="$HOME/.config/Code/User/settings.json"
+
+# current font = second entry of dwm fonts[]
+OLD=$(sed -n '/^static const char \*fonts\[\]/{n;s/^ *"\([^:"]*\):.*/\1/p;}' "$DWM/config.def.h")
+
+if [ -z "$1" ]; then
+	echo "current: $OLD"
+	exit 0
+fi
+
+NEW="$1" PX="$2"
+fc-list : family | tr ',' '\n' | grep -qxF "$NEW" || { echo "font not installed: $NEW" >&2; exit 1; }
+
+# escape for sed: regex side and replacement side
+re() { printf '%s' "$1" | sed 's/[][\.*^$|/]/\\&/g'; }
+rp() { printf '%s' "$1" | sed 's/[\|&/]/\\&/g'; }
+O=$(re "$OLD") N=$(rp "$NEW")
+
+# dwm / dmenu fallback entry, st fallback font
+sed -i --follow-symlinks "s/\"$O:pixelsize=\([0-9.]*\)\"/\"$N:pixelsize=${PX:-\1}\"/" \
+	"$DWM/config.def.h" "$DWM/dmenu/config.def.h"
+sed -i --follow-symlinks "s/^st\.fontalt0: $O:pixelsize=\([0-9.]*\)/st.fontalt0: $N:pixelsize=${PX:-\1}/" "$HOME/.Xresources"
+# alacritty (fontconfig alias)
+sed -i --follow-symlinks "s/<accept><family>$O<\/family><\/accept>/<accept><family>$N<\/family><\/accept>/" \
+	"$HOME/.config/fontconfig/fonts.conf"
+# firefox
+sed -i --follow-symlinks "s/, $O\"/, $N\"/" "$FF/user.js"
+sed -i --follow-symlinks "s/\"$O\"/\"$N\"/g; s/ $O for Chinese/ $N for Chinese/" "$FF/chrome/userChrome.css"
+# vscode editor/terminal, and the UI-font script
+sed -i --follow-symlinks "s/'$O'/'$N'/g" "$CODE" "$HOME/.local/bin/vscode-ui-font"
+# emacs
+sed -i --follow-symlinks "s/^      ch-font \"$O\"$/      ch-font \"$N\"/" "$HOME/System/dotfiles/doom/config.el"
+
+xrdb -merge "$HOME/.Xresources"
+emacsclient --eval "(progn (setq ch-font \"$NEW\")
+  (dolist (s '(han cjk-misc bopomofo kana)) (set-fontset-font t s (font-spec :family ch-font))))" \
+	>/dev/null 2>&1 || true
+
+# rebuild and install dwm + dmenu (config.h is regenerated from config.def.h), re-apply VS Code UI font
+cd "$DWM" && rm -f config.h && { make >/dev/null 2>&1 || make; } && sudo make install >/dev/null
+cd "$DWM/dmenu" && rm -f config.h && { make >/dev/null 2>&1 || make; } && sudo make install >/dev/null
+"$HOME/.local/bin/vscode-ui-font" on >/dev/null
+
+echo "CJK font: $OLD -> $NEW${PX:+ (${PX}px)}. Restart dwm (Mod+Ctrl+Q, startx), firefox and VS Code to see it."

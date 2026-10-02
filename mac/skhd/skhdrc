@@ -1,0 +1,12 @@
+#!/bin/zsh
+# skhd (macOS) app shortcuts. The yabai window-management bindings were removed with yabai.
+
+# terminal
+cmd - return : /Applications/alacritty.app/Contents/MacOS/alacritty
+#cmd - enter: open /Applications/kitty.app && osascript -e 'tell application "Finder" to set currentFolder to POSIX path of (target of front Finder window as alias)' -e 'tell application "kitty" to tell current session of current window to write text "cd " & quoted form of currentFolder'
+
+# apps
+cmd + lshift - w: "open /Applications/Visual Studio Code.app"
+cmd - e : $HOME/.config/skhd/open_emacsclient.sh
+cmd - d: dmenu-mac
+lctrl + lshift - p : ~/.config/bin/mpv-url

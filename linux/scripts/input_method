@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+case $BUTTON in
+    1) setsid  fcitx5-configtool ;;
+	2) setsid st -e emacsclient -nc "~/.config/Scripts/input_method" ;;
+esac
+
+
+# typicons keyboard + label (fcitx5-remote: 2 = active input method, else English)
+kb=$'\ue098'
+case $(fcitx5-remote 2>/dev/null) in
+    2) echo "$kb 中";;
+    *) echo "$kb EN"
+esac

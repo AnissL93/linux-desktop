@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+function kill_emacs() {
+        for i in $(pgrep emacs); do
+                kill -9 $i
+        done
+}
+
+case $1 in
+    "emacs")
+        notify-send "Restart" "Killing and restart Emacs in daemon"
+        kill_emacs
+        ~/.config/emacs/bin/doom sync -e
+        emacs --daemon
+        ;;
+
+esac

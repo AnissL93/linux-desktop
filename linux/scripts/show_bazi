@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+# 当下的八字（年 月 日 时柱），给状态栏用。
+# 按节气换年/月（立春换年），用本地钟表时间定时辰。需要: pip install lunar_python
+from datetime import datetime
+from lunar_python import Solar
+
+n = datetime.now()
+e = Solar.fromYmdHms(n.year, n.month, n.day, n.hour, n.minute, n.second).getLunar().getEightChar()
+print(e.getYear(), e.getMonth(), e.getDay(), e.getTime())

@@ -1,0 +1,64 @@
+#!/bin/sh
+# Switch the Latin monospace font for dwm, dmenu, st, alacritty, firefox, vscode and emacs.
+# usage: set-en-font                      show current font and installed mono fonts
+#        set-en-font "Family" [pixelsize] switch font; sizes are kept unless pixelsize is given
+#                                         (pixel fonts: use multiples of their native size)
+set -e
+
+DWM="$HOME/System/personal-infra/desktop/linux/dwm"
+FF="$("$(dirname "$(readlink -f "$0")")/ff-profile")"   # current Firefox profile
+ALA="$HOME/.config/alacritty/alacritty.toml"
+FC="$HOME/.config/fontconfig/fonts.conf"
+DOOM="$HOME/System/dotfiles/doom/config.el"
+
+# current font = first entry of dwm fonts[]
+OLD=$(sed -n 's/^static const char \*fonts\[\] = {"\([^:"]*\):.*/\1/p' "$DWM/config.def.h")
+
+if [ -z "$1" ]; then
+	echo "current: $OLD"
+	echo "installed monospace fonts:"
+	fc-list :spacing=mono family | sort -u | sed 's/^/  /'
+	exit 0
+fi
+
+NEW="$1" PX="$2"
+fc-list : family | grep -qxF "$NEW" || { echo "font not installed: $NEW" >&2; exit 1; }
+
+# escape for sed: regex side and replacement side
+re() { printf '%s' "$1" | sed 's/[][\.*^$|/]/\\&/g'; }
+rp() { printf '%s' "$1" | sed 's/[\|&/]/\\&/g'; }
+O=$(re "$OLD") N=$(rp "$NEW")
+
+# dwm (bar font + dmenufont) and dmenu
+sed -i --follow-symlinks "s/\"$O:pixelsize=\([0-9]*\)\"/\"$N:pixelsize=${PX:-\1}\"/" \
+	"$DWM/config.def.h" "$DWM/dmenu/config.def.h"
+# alacritty, and the CJK-fallback alias that is keyed on this family
+sed -i --follow-symlinks "s/family = \"$O\"/family = \"$N\"/" "$ALA"
+sed -i --follow-symlinks "s/<family>$O<\/family>/<family>$N<\/family>/" "$FC"
+# firefox (UI + all page fonts)
+sed -i --follow-symlinks "s/\"$O/\"$N/g" "$FF/user.js" "$FF/chrome/userChrome.css"
+# vscode (editor + integrated terminal)
+sed -i --follow-symlinks "s/'$O'/'$N'/g" "$HOME/.config/Code/User/settings.json"
+# st (X resources) and the VS Code UI-font script
+sed -i --follow-symlinks "s/^st\.font: $O:/st.font: $N:/" "$HOME/.Xresources"
+sed -i --follow-symlinks "s/'$O'/'$N'/g" "$HOME/.local/bin/vscode-ui-font"
+# emacs
+sed -i --follow-symlinks "s/^(setq cur-font \"$O\"/(setq cur-font \"$N\"/" "$DOOM"
+
+if [ -n "$PX" ]; then
+	sed -i --follow-symlinks "s/^size = [0-9.]*.*/size = $((PX * 3 / 4))   # pt, = ${PX}px/" "$ALA"
+	sed -i --follow-symlinks "s/^      en-font-size [0-9]*)/      en-font-size $PX)/" "$DOOM"
+fi
+
+xrdb -merge "$HOME/.Xresources"
+# running emacs daemon
+emacsclient --eval "(progn (setq cur-font \"$NEW\")
+  (setq doom-font (font-spec :family cur-font :size ${PX:-en-font-size}))
+  (doom/reload-font))" >/dev/null 2>&1 || true
+
+# rebuild and install dwm + dmenu (config.h is regenerated from config.def.h)
+cd "$DWM" && rm -f config.h && { make >/dev/null 2>&1 || make; } && sudo make install >/dev/null
+cd "$DWM/dmenu" && rm -f config.h && { make >/dev/null 2>&1 || make; } && sudo make install >/dev/null
+"$HOME/.local/bin/vscode-ui-font" on >/dev/null
+
+echo "Latin font: $OLD -> $NEW${PX:+ (${PX}px)}. Restart dwm (Mod+Ctrl+Q, startx) and firefox to see it."

@@ -1,0 +1,33 @@
+#!/bin/sh
+# Put the IBM VGA font on the VS Code UI (menus, explorer, tabs, status bar...).
+# VS Code has no setting for this, so a <style> block is injected into workbench.html.
+# usage: vscode-ui-font [on|off]   (needs sudo: VS Code lives in /usr/share/code)
+# Re-run "on" after every VS Code update; updates overwrite workbench.html.
+# VS Code may warn "installation appears to be corrupt": choose "Don't show again".
+set -e
+
+HTML=/usr/share/code/resources/app/out/vs/code/electron-browser/workbench/workbench.html
+FONT="'PxPlus IBM VGA 8x16', 'Cubic 11', monospace"
+
+CSS="<style id=\"amber-ui-font\">
+.monaco-workbench, .monaco-workbench .menubar, .monaco-menu-container, .monaco-workbench .monaco-list,
+.monaco-workbench .tabs-container, .monaco-workbench .statusbar, .monaco-workbench .quick-input-widget {
+  font-family: $FONT !important;
+  font-size: 16px !important;  /* pixel font: 16 = native, crisp */
+}
+.monaco-workbench .codicon { font-family: codicon !important; }  /* keep icons */
+</style>"
+
+# on: (re)insert the block before </head>; off: just remove it
+case "${1:-on}" in
+on|off) printf '%s' "$CSS" | sudo python3 -c '
+import re, sys
+p, mode, css = sys.argv[1], sys.argv[2], sys.stdin.read()
+s = open(p).read()
+s = re.sub(r"\n?\t*<style id=\"amber-ui-font\">.*?</style>", "", s, flags=re.S)
+if mode == "on":
+    s = s.replace("</head>", css + "\n\t</head>", 1)
+open(p, "w").write(s)' "$HTML" "${1:-on}"
+     echo "UI font ${1:-on}. Restart VS Code." ;;
+*)   echo "usage: $(basename "$0") [on|off]" >&2; exit 1 ;;
+esac

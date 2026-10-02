@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Set the wallpaper. Colours are left alone (they belong to `theme`).
+#
+# usage: changebg              current theme's wallpaper (one image per monitor)
+#        changebg THEME        that theme's wallpaper, e.g. `changebg vapor`
+#        changebg IMAGE        this image on every monitor (each zoomed to fill)
+#        changebg DIR          a random image from DIR
+
+themes="$HOME/System/dotfiles/themes"
+
+set_image() {
+    xwallpaper --zoom "$1" && notify-send "Wallpaper" "$1" -t 2000
+}
+
+if [[ $# -eq 0 ]]; then
+    theme --wallpaper
+elif [[ -f "$themes/$1.conf" ]]; then
+    theme --wallpaper "$1" && notify-send "Wallpaper" "theme: $1" -t 2000
+elif [[ -d "$1" ]]; then
+    pic="$(find "$(readlink -f "$1")" -type f -iregex '.*\.\(jpg\|jpeg\|png\|gif\|webp\)' | shuf -n 1)"
+    [[ -n "$pic" ]] && set_image "$pic" || { notify-send "Error" "No images in $1" -t 2000; exit 1; }
+elif [[ "$(file --mime-type -b "$(readlink -f "$1")")" == image/* ]]; then
+    set_image "$(readlink -f "$1")"
+else
+    notify-send "Error" "Not an image, folder or theme: $1" -t 2000
+    exit 1
+fi

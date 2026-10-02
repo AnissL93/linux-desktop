@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+
+fet_type=$(echo -e "DOI\nDBLP\nTITLE" | dmenu -i -p "Fetch paper by:")
+clip_content=$(xclip -out -sel clipboard)
+
+notify-send "Fetching paper of ${fet_type}-$clip_content"
+
+paper_key_param=""
+case $fet_type in
+    "DOI")
+        paper_key_param="--doi=${clip_content}"
+        ;;
+    "DBLP")
+        paper_key_param="--dblp_id=${clip_content}"
+        ;;
+    "TITLE")
+        paper_key_param="--title=${clip_content}"
+        ;;
+    *)
+        ;;
+esac
+
+use_proxy=$(echo -e "True\nFalse" | dmenu -i -p "Use proxy:")
+
+echo ${clip_content}
+
+if [[ -z "${fet_type}" ]]; then
+    echo "No valid paper key is found!"
+    exit
+fi
+
+paper_path=$HOME/DataBase/Papers
+proj_path=$HOME/Projects/Paper-util/paper-fetcher/pf
+
+cmd="python ${proj_path}/paper.py $paper_key_param --download_pdf  --download_pdf_path=$paper_path --proxy=$use_proxy --config=${proj_path}/config.json --print_bib"
+echo $cmd
+eval $cmd | xclip -sel clip

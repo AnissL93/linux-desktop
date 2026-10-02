@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Displays todays precipication chance (☔) and daily low (🥶) and high (🌞).
+# Usually intended for the statusbar.
+
+# If we have internet, get a weather report from wttr.in and store it locally.
+# You could set up a shell alias to view the full file in a pager in the
+# terminal if desired. This function will only be run once a day when needed.
+weatherreport="${XDG_DATA_HOME:-$HOME/.local/share}/weatherreport"
+weatherreport_brief="${XDG_DATA_HOME:-$HOME/.local/share}/weatherreport_brief"
+
+getforecast() {
+    curl -sf "wttr.in/ " > "$weatherreport";
+    #curl -sf "wttr.in/Markethill?format=3" > "$weatherreport_brief" || exit 1 ;
+    curl wttr.in/Markethill?format="%l:+%c+%t+%h+%m" > "$weatherreport_brief" || exit 1 ;
+    echo "" >> $weatherreport_brief
+}
+
+# Some very particular and terse stream manipulation. We get the maximum
+# precipitation chance and the daily high and low from the downloaded file and
+# display them with coresponding emojis.
+# wttr.in emoji -> typicons (~/.local/share/fonts/typicons) so the bar stays monochrome amber
+ti() { printf "$1"; }
+showweather() {
+    sed -e 's/\xef\xb8\x8f//g' \
+        -e "s/☀/$(ti '\356\205\202')/g" \
+        -e "s/⛅/$(ti '\356\204\276')/g" \
+        -e "s/☁/$(ti '\356\204\273')/g;  s/🌫/$(ti '\356\204\273')/g" \
+        -e "s/🌦/$(ti '\356\204\277')/g" \
+        -e "s/🌧/$(ti '\356\204\274')/g" \
+        -e "s/⛈/$(ti '\356\205\201')/g;  s/🌩/$(ti '\356\205\201')/g" \
+        -e "s/❄/$(ti '\356\205\200')/g;  s/🌨/$(ti '\356\205\200')/g" \
+        -e "s/✨/$(ti '\356\204\211')/g" \
+        -e "s/[🌑🌒🌓🌔🌕🌖🌗🌘]/$(ti '\356\204\275')/g" \
+        "$weatherreport_brief"
+}
+# icons: weather-sunny, -partly-sunny, -cloudy (also fog), -shower, -downpour, -stormy, -snow, star (unknown), weather-night (moon)
+
+case $BUTTON in
+	1) setsid st -e less -Srf "$weatherreport" ;;
+	2) setsid st -e emacsclient -nc "~/.config/Scripts/show_weather" ;;
+	3) getforecast && showweather ;;
+esac
+
+# The test if our forcecast is updated to the day. If it isn't download a new
+# weather report from wttr.in with the above function.
+[ "$(stat -c %y "$weatherreport" 2>/dev/null | cut -d' ' -f1)" = "$(date '+%Y-%m-%d')" ] ||
+	getforecast
+
+showweather

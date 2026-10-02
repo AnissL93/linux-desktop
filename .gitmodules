@@ -1,12 +1,12 @@
 [submodule "dwm"]
-	path = dwm
+	path = linux/dwm
 	url = https://github.com/AnissL93/dwm
 [submodule "st"]
-	path = st
+	path = linux/st
 	url = https://github.com/AnissL93/st.git
 [submodule "wallpapers"]
 	path = wallpapers
 	url = https://github.com/makccr/wallpapers.git
 [submodule "slock"]
-	path = slock
+	path = linux/slock
 	url = https://github.com/AnissL93/slock.git

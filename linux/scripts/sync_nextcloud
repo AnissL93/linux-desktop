@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+### Sync file between nextcloud and local file
+### Paper
+### Notes
+
+local_base=~/DataBase
+mount_base=~/DataBase/Nextcloud
+subdirs=("Notes" "Papers" "Books")
+
+function upload_all() {
+    for dir in "${subdirs[@]}"; do
+        local local_dir=${local_base}/${dir}/
+        local mount_dir=${mount_base}/${dir}/
+        cmd="rsync -av ${local_dir} ${mount_dir}"
+        echo $cmd
+        eval $cmd && notify-send "Upload $dir successful!"
+    done
+}
+
+function upload() {
+    dir=$1
+    local local_dir=${local_base}/${dir}/
+    local mount_dir=${mount_base}/${dir}/
+    cmd="rsync -av ${local_dir} ${mount_dir}"
+    echo $cmd
+    eval $cmd && notify-send "Uploading $dir successful!"
+}
+
+function download_all() {
+    for dir in "${subdirs[@]}"; do
+        local local_dir=${local_base}/${dir}/
+        local mount_dir=${mount_base}/${dir}/
+        cmd="rsync -av ${local_dir} ${mount_dir}"
+        echo $cmd
+        eval $cmd && notify-send "Download $dir successful!"
+    done
+}
+
+function download() {
+    dir=$1
+    local local_dir=${local_base}/${dir}/
+    local mount_dir=${mount_base}/${dir}/
+    cmd="rsync -av ${mount_dir} ${local_dir}"
+    eval $cmd && notify-send "Download $dir successful!"
+}
+
+action=$(echo -e "Upload\nDownload\n" | dmenu -p "Sync with Nextcloud:")
+sel=$(echo -e "Notes\nPapers\nBooks\nAll\n" | dmenu -p "Choose folder:")
+
+case $action in
+    "Upload")
+        echo $sel
+    if [[ "$sel" =~ "All" ]]; then
+        upload_all
+    else
+        upload $sel
+    fi
+    ;;
+
+    "Download")
+    if [[ "$sel" =~ "All" ]]; then
+        download_all
+    else
+        download $sel
+    fi
+    ;;
+
+esac

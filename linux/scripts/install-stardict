@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+mkdir -p ~/.local/share/stardict/dic
+cd ~/.local/share/stardict/dic
+for i in {1..8}; do
+    aria2c https://phoenixnap.dl.sourceforge.net/project/huzheng/stardict-dic/stardict-dic_20191212.tar.${i}
+done
+
+# unzip the splitted tar
+cat stardict-dic_20191212.tar.* | tar xvf -
+
+# unzip any dictionary you like, for example
+tar xjf stardict-langdao-ec-gb-2.4.2.tar.bz2
+tar xjf stardict-langdao-ce-gb-2.4.2.tar.bz2
+
+sdcv --list-dicts --data-dir=$HOME/.local/share/stardict/dic/zh_CN --only-data-dir

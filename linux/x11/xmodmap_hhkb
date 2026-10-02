@@ -1,0 +1,49 @@
+clear control
+clear mod1
+
+keycode 37 = Escape
+
+keycode 64 = Control_L
+add Control = Control_L
+
+keycode 134 = Alt_R
+clear mod4
+add mod1 = Alt_R
+
+keycode 108 = Mode_switch
+keycode 51 = BackSpace
+
+keysym Tab = Tab BackTab asciitilde asciitilde
+keysym q = q Q exclam exclam
+keysym z = z Z at at
+keysym b = b B numbersign numbersign
+keysym g = g G dollar dollar
+keysym t = t T percent percent
+keysym y = y Y ampersand ampersand
+keysym u = u U asterisk asterisk
+keysym i = i I parenleft parenleft
+keysym o = o O parenright parenright
+keysym p = p P plus plus
+keysym n = n N underscore underscore
+keysym m = m M minus minus
+keysym apostrophe = apostrophe quotedbl grave grave
+keysym semicolon = semicolon colon asciicircum asciicircum
+keysym bracketleft = bracketleft braceleft backslash backslash 
+keysym bracketright = bracketright braceright bar bar
+keysym comma = comma less equal equal
+
+keysym a = a A 0 parenright
+keysym w = w W 1 exclam
+keysym e = e E 2 at
+keysym r = r R 3 numbersign
+keysym s = s S 4 dollar
+keysym d = d D 5 percent
+keysym f = f F 6 asciicircum
+keysym x = x X 7 ampersand
+keysym c = c C 8 asterisk
+keysym v = v V 9 parenleft
+
+keysym h = h H Left Left
+keysym j = j J Down Down
+keysym k = k K Up Up
+keysym l = l L Right Right

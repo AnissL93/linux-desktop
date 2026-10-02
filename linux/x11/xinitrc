@@ -1,0 +1,43 @@
+source ~/.bashrc
+# one session bus for everything: the systemd user bus (a private dbus-launch bus split apps in two,
+# e.g. `theme` from a terminal on the systemd bus could not reach fcitx5)
+if [ -S "/run/user/$(id -u)/bus" ]; then
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+    dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
+else
+    eval "$(dbus-launch --sh-syntax --exit-with-session)"
+fi
+export LANG=zh_CN.UTF-8
+export LC_ALL="en_US.UTF-8"
+export XMODIFIERS="@im=fcitx"
+export QT_IM_MODULE="fcitx"
+export GTK_IM_MODULE="fcitx"
+fcitx5 > /dev/null 2>&1 &
+
+#redshift &
+
+#xbacklight -set $(cat ~/.config/X11/xbacklight)
+
+#~/.config/Scripts/selmon init
+
+# alacritty: same font size on both monitors (they have different DPI)
+export WINIT_X11_SCALE_FACTOR=1
+
+xcompmgr &
+
+# first start on a new machine: generate the colour theme (bootstrap.sh can't without X)
+[ -f ~/.config/theme/xresources ] || ~/.local/bin/theme "$(cat ~/.config/theme/current 2>/dev/null || echo amber)"
+
+# wallpaper of the current colour theme (see `theme`, ~/System/dotfiles/themes), one image per monitor
+~/.local/bin/theme --wallpaper
+#xwallpaper --zoom "$HOME/.local/share/bg"
+#wal -i $(realpath "$HOME/.local/share/bg") --backend colorz
+xrdb -merge ~/.Xresources
+
+xset s off
+xset -dpms
+
+emacs --daemon
+dwmblocks &
+exec dwm
+

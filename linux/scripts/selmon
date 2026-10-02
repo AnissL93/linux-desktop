@@ -46,7 +46,7 @@ set_indep_left_to_right_by_index() {
         left=$i
     done
     local bgloc="$HOME/.local/share/bg"
-    xwallpaper --zoom "$bgloc"
+    feh --no-fehbg --bg-fill "$bgloc"
 }
 
 get_current_monitor() {
@@ -85,7 +85,7 @@ set_current_as_main_left() {
         fi
     done
     local bgloc="$HOME/.local/share/bg"
-    [ -f "$bgloc" ] && xwallpaper --zoom "$bgloc"
+    [ -f "$bgloc" ] && feh --no-fehbg --bg-fill "$bgloc"
 }
 
 sel_from_dmenu() {

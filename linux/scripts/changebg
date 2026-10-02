@@ -9,7 +9,7 @@
 themes="$HOME/System/dotfiles/themes"
 
 set_image() {
-    xwallpaper --zoom "$1" && notify-send "Wallpaper" "$1" -t 2000
+    feh --no-fehbg --bg-fill "$1" && notify-send "Wallpaper" "$1" -t 2000
 }
 
 if [[ $# -eq 0 ]]; then

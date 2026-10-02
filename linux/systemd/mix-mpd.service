@@ -1,0 +1,14 @@
+[Unit]
+Description=mix-mpd (MPD server for rmpc: NetEase Cloud Music, local media, mpv)
+Wants=pipewire-pulse.service
+After=network-online.target pipewire-pulse.service
+
+[Service]
+ExecStart=%h/go/bin/mix-mpd -bilibili-cookies firefox -music %h/Media
+# yt-dlp (YouTube/Bilibili) lives in ~/.local/bin; set PATH so it is found at boot too.
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

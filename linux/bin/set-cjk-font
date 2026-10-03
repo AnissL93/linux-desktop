@@ -18,7 +18,11 @@ if [ -z "$1" ]; then
 fi
 
 NEW="$1" PX="$2"
+case "$PX" in *[!0-9.]*) echo "pixelsize must be a number: $PX" >&2; exit 1;; esac
 fc-list : family | tr ',' '\n' | grep -qxF "$NEW" || { echo "font not installed: $NEW" >&2; exit 1; }
+# both scripts find their font by family name, so Latin and CJK must differ
+EN=$(sed -n 's/^static const char \*fonts\[\] = {"\([^:"]*\):.*/\1/p' "$DWM/config.def.h")
+[ "$NEW" != "$EN" ] || { echo "$NEW is already the Latin font; pick another family (e.g. its zh_cn variant)" >&2; exit 1; }
 
 # escape for sed: regex side and replacement side
 re() { printf '%s' "$1" | sed 's/[][\.*^$|/]/\\&/g'; }

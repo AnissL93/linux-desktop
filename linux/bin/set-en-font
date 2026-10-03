@@ -22,7 +22,11 @@ if [ -z "$1" ]; then
 fi
 
 NEW="$1" PX="$2"
-fc-list : family | grep -qxF "$NEW" || { echo "font not installed: $NEW" >&2; exit 1; }
+case "$PX" in *[!0-9.]*) echo "pixelsize must be a number: $PX" >&2; exit 1;; esac
+fc-list : family | tr ',' '\n' | grep -qxF "$NEW" || { echo "font not installed: $NEW" >&2; exit 1; }
+# both scripts find their font by family name, so Latin and CJK must differ
+CJK=$(sed -n '/^static const char \*fonts\[\]/{n;s/^ *"\([^:"]*\):.*/\1/p;}' "$DWM/config.def.h")
+[ "$NEW" != "$CJK" ] || { echo "$NEW is already the CJK font; pick another family (e.g. its latin variant)" >&2; exit 1; }
 
 # escape for sed: regex side and replacement side
 re() { printf '%s' "$1" | sed 's/[][\.*^$|/]/\\&/g'; }
@@ -30,7 +34,7 @@ rp() { printf '%s' "$1" | sed 's/[\|&/]/\\&/g'; }
 O=$(re "$OLD") N=$(rp "$NEW")
 
 # dwm (bar font + dmenufont) and dmenu
-sed -i --follow-symlinks "s/\"$O:pixelsize=\([0-9]*\)\"/\"$N:pixelsize=${PX:-\1}\"/" \
+sed -i --follow-symlinks "s/\"$O:pixelsize=\([0-9.]*\)\"/\"$N:pixelsize=${PX:-\1}\"/" \
 	"$DWM/config.def.h" "$DWM/dmenu/config.def.h"
 # alacritty, and the CJK-fallback alias that is keyed on this family
 sed -i --follow-symlinks "s/family = \"$O\"/family = \"$N\"/" "$ALA"
@@ -45,15 +49,17 @@ sed -i --follow-symlinks "s/'$O'/'$N'/g" "$HOME/.local/bin/vscode-ui-font"
 # emacs
 sed -i --follow-symlinks "s/^(setq cur-font \"$O\"/(setq cur-font \"$N\"/" "$DOOM"
 
+# emacs: integer = pixels, float = points, so round
+[ -n "$PX" ] && EPX=$(printf %.0f "$PX")
 if [ -n "$PX" ]; then
-	sed -i --follow-symlinks "s/^size = [0-9.]*.*/size = $((PX * 3 / 4))   # pt, = ${PX}px/" "$ALA"
-	sed -i --follow-symlinks "s/^      en-font-size [0-9]*)/      en-font-size $PX)/" "$DOOM"
+	sed -i --follow-symlinks "s/^size = [0-9.]*.*/size = $(awk "BEGIN{print $PX*3/4}")   # pt, = ${PX}px/" "$ALA"
+	sed -i --follow-symlinks "s/^      en-font-size [0-9]*)/      en-font-size $EPX)/" "$DOOM"
 fi
 
 xrdb -merge "$HOME/.Xresources"
 # running emacs daemon
 emacsclient --eval "(progn (setq cur-font \"$NEW\")
-  (setq doom-font (font-spec :family cur-font :size ${PX:-en-font-size}))
+  (setq doom-font (font-spec :family cur-font :size ${EPX:-en-font-size}))
   (doom/reload-font))" >/dev/null 2>&1 || true
 
 # rebuild and install dwm + dmenu (config.h is regenerated from config.def.h)
